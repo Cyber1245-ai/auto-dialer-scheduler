@@ -12,6 +12,7 @@ import yaml
 from contacts import load_contacts, save_contacts
 from caller import place_call
 from logger import log_call
+from notifier import send_confirmation
 
 
 def load_config(path: str = "config.yaml") -> dict:
@@ -28,9 +29,9 @@ def in_call_window(config: dict) -> bool:
     return start <= now.time() <= end
 
 
-def run(dry_run: bool = False):
+def run(dry_run: bool = False, notify: bool = True):
     config = load_config()
-    print(f"[Dialer] Starting. Dry run: {dry_run}")
+    print(f"[Dialer] Starting. Dry run: {dry_run} | SMS notifications: {notify}")
 
     while True:
         contacts = load_contacts(config["contacts_file"])
@@ -63,6 +64,12 @@ def run(dry_run: bool = False):
                     to=contact["phone_number"],
                     message=config["message"],
                 )
+                if notify and status in ("answered", "no-answer", "failed"):
+                    send_confirmation(
+                        to=contact["phone_number"],
+                        name=contact["name"],
+                        status=status,
+                    )
 
             contact["attempts"] = attempts + 1
             contact["status"] = status
@@ -86,6 +93,7 @@ def show_log(config: dict):
 def main():
     parser = argparse.ArgumentParser(description="Auto-dialer scheduler")
     parser.add_argument("--dry-run", action="store_true", help="Simulate without placing calls")
+    parser.add_argument("--no-notify", action="store_true", help="Disable SMS confirmations")
     parser.add_argument("--log", action="store_true", help="Print call log and exit")
     args = parser.parse_args()
 
@@ -94,7 +102,7 @@ def main():
     if args.log:
         show_log(config)
     else:
-        run(dry_run=args.dry_run)
+        run(dry_run=args.dry_run, notify=not args.no_notify)
 
 
 if __name__ == "__main__":
