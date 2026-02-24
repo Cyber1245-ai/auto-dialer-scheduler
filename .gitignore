@@ -1,0 +1,10 @@
+.env
+config.yaml
+contacts.csv
+call_log.csv
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.log
+.DS_Store

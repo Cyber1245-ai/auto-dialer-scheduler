@@ -1,0 +1,13 @@
+call_window:
+  start: "09:00"
+  end: "20:00"
+  timezone: "America/New_York"
+
+message: "Hello, this is a reminder for your appointment tomorrow at 2pm. Press 1 to confirm or 2 to cancel."
+
+retry:
+  max_attempts: 3
+  delay_minutes: 30
+
+contacts_file: contacts.csv
+log_file: call_log.csv
